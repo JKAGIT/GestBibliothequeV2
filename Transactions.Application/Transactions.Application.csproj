@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Commands\Emprunts\" />
+    <Folder Include="Commands\Retours\" />
+    <Folder Include="Commands\Reservations\" />
+    <Folder Include="DTO\" />
+    <Folder Include="Mappings\" />
+    <Folder Include="Queries\Empunts\" />
+    <Folder Include="Queries\Reservations\" />
+    <Folder Include="Queries\Retours\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="14.0.0" />
+    <PackageReference Include="MediatR" Version="12.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Transactions.Domain\Transactions.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
