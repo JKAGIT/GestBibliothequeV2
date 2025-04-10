@@ -1,0 +1,251 @@
+﻿@page "/Emprunt/emprunts"
+@using GestBibliotheque.Blazor.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@using CommonLib.GestBibliotheque.Utilitaires
+
+<h2 class="text-center mb-4">Gestion des emprunts</h2>
+
+<div class="mb-3">
+    <a href="/Emprunt/Ajout-Emprunts" class="btn btn-primary">Emprunter un livre</a>
+</div>
+
+<!-- Tableau des emprunts actifs -->
+<h3>Emprunts Actifs</h3>
+@if (activeEmprunts == null)
+{
+    @* <p class="alert alert-warning">Chargement des emprunts actifs...</p> *@
+    <div class="alert alert-warning d-flex align-items-center">
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        Chargement des données en cours...
+    </div>
+}
+else if (!activeEmprunts.Any())
+{
+    <p class="alert alert-info">Aucun emprunt actif.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th>Nom &amp; Prénoms</th>
+                    <th>Titre du Livre</th>
+                    <th>Date d'emprunt</th>
+                    <th>Date de retour prévue</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var emprunt in PagedActiveEmprunts)
+                {
+                    <tr>
+                        <td>@emprunt.NomCompletUsager</td>
+                        <td>@emprunt.TitreLivre</td>
+                        <td>@emprunt.DateDebut.ToString("yyyy-MM-dd")</td>
+                        <td>@emprunt.DateRetourPrevue.ToString("yyyy-MM-dd")</td>
+                        <td>
+                            @if (emprunt.EnRetard)
+                            {
+                                <span style="color:red;">En retard</span>
+                            }
+                            else
+                            {
+                                <span style="color:green;">A jour</span>
+                            }
+                        </td>
+                        <td>
+                            <a href="/Emprunt/Modifier-Emprunts/@emprunt.ID" class="btn btn-primary btn-sm me-2">Modifier</a>
+                            <a href="/Emprunt/Details-Emprunts/@emprunt.ID" class="btn btn-info btn-sm me-2">Détails</a>                       
+                            <a href="/Retour/Ajout-Retours/@emprunt.ID" class="btn btn-warning btn-sm">Retourner le livre</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination pour les emprunts actifs -->
+    <nav>
+        <ul class="pagination">
+            <li class="page-item @(currentPageActive == 1 ? "disabled" : "")">
+                <a class="page-link" @onclick="PrevActive">Précédent</a>
+            </li>
+            @for (int i = 1; i <= totalPagesActive; i++)
+            {
+                <li class="page-item @(currentPageActive == i ? "active" : "")">
+                    <a class="page-link" @onclick="() => GoToPageActive(i)">@i</a>
+                </li>
+            }
+            <li class="page-item @(currentPageActive == totalPagesActive ? "disabled" : "")">
+                <a class="page-link" @onclick="NextActive">Suivant</a>
+            </li>
+        </ul>
+    </nav>
+}
+
+<!-- Tableau des emprunts retournés -->
+<h3 class="mt-5">Emprunts Retournés</h3>
+@if (inactiveEmprunts == null)
+{
+    @* <p class="alert alert-warning">Chargement des emprunts retournés...</p> *@
+    <div class="alert alert-warning d-flex align-items-center">
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        Chargement des données en cours...
+    </div>
+}
+else if (!inactiveEmprunts.Any())
+{
+    <p class="alert alert-info">Aucun emprunt retourné.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th>Nom &amp; Prénoms</th>
+                    <th>Titre du Livre</th>
+                    <th>Date d'emprunt</th>
+                    <th>Date de retour prévue</th>
+                    <th>Date de retour effective</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var emprunt in PagedInactiveEmprunts)
+                {
+                    <tr>
+                        <td>@emprunt.NomCompletUsager</td>
+                        <td>@emprunt.TitreLivre</td>
+                        <td>@emprunt.DateDebut.ToString("yyyy-MM-dd")</td>
+                        <td>@emprunt.DateRetourPrevue.ToString("yyyy-MM-dd")</td>
+                        <td>@(emprunt.DateRetour.HasValue ? emprunt.DateRetour.Value.ToString("yyyy-MM-dd") : "-")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination pour les emprunts retournés -->
+    <nav>
+        <ul class="pagination">
+            <li class="page-item @(currentPageInactive == 1 ? "disabled" : "")">
+                <a class="page-link" @onclick="PrevInactive">Précédent</a>
+            </li>
+            @for (int i = 1; i <= totalPagesInactive; i++)
+            {
+                <li class="page-item @(currentPageInactive == i ? "active" : "")">
+                    <a class="page-link" @onclick="() => GoToPageInactive(i)">@i</a>
+                </li>
+            }
+            <li class="page-item @(currentPageInactive == totalPagesInactive ? "disabled" : "")">
+                <a class="page-link" @onclick="NextInactive">Suivant</a>
+            </li>
+        </ul>
+    </nav>
+}
+
+@code {
+    private List<EmpruntDto>? emprunts;
+
+    private List<EmpruntDto> activeEmprunts = new();
+    private List<EmpruntDto> inactiveEmprunts = new();
+
+    private string? Message;
+    private bool Success;
+
+    // Pagination pour les emprunts actifs
+    private int currentPageActive = 1;
+    private int pageSizeActive = 5;
+    private int totalPagesActive => (activeEmprunts.Count > 0)
+        ? (int)Math.Ceiling(activeEmprunts.Count / (double)pageSizeActive)
+        : 1;
+    private IEnumerable<EmpruntDto> PagedActiveEmprunts => activeEmprunts
+        .Skip((currentPageActive - 1) * pageSizeActive)
+        .Take(pageSizeActive);
+
+    private void PrevActive()
+    {
+        if (currentPageActive > 1)
+        {
+            currentPageActive--;
+        }
+    }
+
+    private void NextActive()
+    {
+        if (currentPageActive < totalPagesActive)
+        {
+            currentPageActive++;
+        }
+    }
+
+    private void GoToPageActive(int page)
+    {
+        if (page >= 1 && page <= totalPagesActive)
+        {
+            currentPageActive = page;
+        }
+    }
+
+    // Pagination pour les emprunts retournés
+    private int currentPageInactive = 1;
+    private int pageSizeInactive = 5;
+    private int totalPagesInactive => (inactiveEmprunts.Count > 0)
+        ? (int)Math.Ceiling(inactiveEmprunts.Count / (double)pageSizeInactive)
+        : 1;
+    private IEnumerable<EmpruntDto> PagedInactiveEmprunts => inactiveEmprunts
+        .Skip((currentPageInactive - 1) * pageSizeInactive)
+        .Take(pageSizeInactive);
+
+    private void PrevInactive()
+    {
+        if (currentPageInactive > 1)
+        {
+            currentPageInactive--;
+        }
+    }
+
+    private void NextInactive()
+    {
+        if (currentPageInactive < totalPagesInactive)
+        {
+            currentPageInactive++;
+        }
+    }
+
+    private void GoToPageInactive(int page)
+    {
+        if (page >= 1 && page <= totalPagesInactive)
+        {
+            currentPageInactive = page;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ChargerEmprunts();
+    }
+
+    private async Task ChargerEmprunts()
+    {
+        try
+        {
+            emprunts = await Http.GetFromJsonAsync<List<EmpruntDto>>("/api-bibliotheque/emprunts");
+            if (emprunts != null)
+            {
+                activeEmprunts = emprunts.Where(e => !e.EstRendu).ToList();
+                inactiveEmprunts = emprunts.Where(e => e.EstRendu).ToList();
+                currentPageActive = 1;
+                currentPageInactive = 1;
+            }
+        }
+        catch (Exception ex)
+        {
+            Message = GestionErreurs.GererErreur(ex);
+            Success = false;
+        }
+    }
+}

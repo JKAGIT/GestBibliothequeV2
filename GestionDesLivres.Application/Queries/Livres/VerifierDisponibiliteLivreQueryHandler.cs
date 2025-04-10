@@ -21,12 +21,19 @@ namespace GestionDesLivres.Application.Queries.Livres
 
         public async Task<bool> Handle(VerifierDisponibiliteLivreQuery request, CancellationToken cancellationToken)
         {
-            var livre = await _livreRepository.GetByIdAsync(request.Id);
+            try
+            {
+                var livre = await _livreRepository.GetByIdAsync(request.Id);
 
-            if (livre == null)
-                throw new ValidationException(ErreurMessageProvider.GetMessage("EnregistrementNonTrouve", "Livre", request.Id));
+                if (livre == null)
+                    throw new ValidationException(ErreurMessageProvider.GetMessage("EnregistrementNonTrouve", "Livre", request.Id));
 
-            return await _livreRepository.EstDisponible(request.Id);
+                return await _livreRepository.EstDisponible(request.Id);
+            }
+            catch (ValidationException ex)
+            {
+                throw new ValidationException(ErreurMessageProvider.GetMessage(ex.Message));
+            }
         }
     }
 }

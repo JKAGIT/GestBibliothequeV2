@@ -1,8 +1,10 @@
 ﻿using GestionDesLivres.Application.Commands.Livres;
 using GestionDesLivres.Domain.Common.Interfaces;
+using GestionDesLivres.Domain.Entities;
 using GestionDesLivres.Domain.Exceptions;
 using GestionDesLivres.Domain.Repositories;
 using GestionDesLivres.Domain.Resources;
+using GestionDesLivres.Infrastructure.Repositories;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -15,26 +17,44 @@ namespace GestionDesLivres.Application.Commands.Categories
     public class SupprimerLivreCommandHandler : IRequestHandler<SupprimerLivreCommand, bool>
     {
         private readonly ILivreRepository _livreRepository;
+        private readonly IRecherche<Emprunt> _recherche;
         private readonly IUnitOfWork _unitOfWork;
 
-        public SupprimerLivreCommandHandler(ILivreRepository livreRepository, IUnitOfWork unitOfWork)
+        public SupprimerLivreCommandHandler(ILivreRepository livreRepository, IUnitOfWork unitOfWork, IRecherche<Emprunt> recherche)
         {
             _livreRepository = livreRepository;
             _unitOfWork = unitOfWork;
+            _recherche = recherche;
         }
 
         public async Task<bool> Handle(SupprimerLivreCommand request, CancellationToken cancellationToken)
         {
-            var livre = await _livreRepository.GetByIdAsync(request.Id);
-            if (livre == null)
-                throw new ValidationException(ErreurMessageProvider.GetMessage("EnregistrementNonTrouve", "Livre", request.Id));
+            try
+            {
+                var livre = await _livreRepository.GetByIdAsync(request.Id);
+                if (livre == null)
+                    throw new ValidationException(ErreurMessageProvider.GetMessage("EnregistrementNonTrouve", "Livre", request.Id));
 
-            // gerer les emprunts pour eviter de supprimer les livres empruntés ----------- A FAIRE
+                var empruntsActifs = await _recherche.FindAsync(e => e.IDLivre == request.Id && !e.EstRendu);
 
-            await _livreRepository.DeleteAsync(request.Id);
-            await _unitOfWork.CompleteAsync();
+                if (empruntsActifs.Any())
+                    throw new ValidationException(ErreurMessageProvider.GetMessage("ErreurSuppressionEntiteLiee", "un emprunt", "livre"));
 
-            return true;
+
+                await _livreRepository.DeleteAsync(request.Id);
+                await _unitOfWork.CompleteAsync();
+
+                return true;
+            }
+            catch (ValidationException ex)
+            {
+                throw new ValidationException(ex.Message, ex);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Une erreur inattendue s'est produite.", ex);
+            }
+
         }
 
     }

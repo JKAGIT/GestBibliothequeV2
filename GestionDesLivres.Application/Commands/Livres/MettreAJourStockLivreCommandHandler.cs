@@ -24,17 +24,25 @@ namespace GestionDesLivres.Application.Commands.Livres
 
         public async Task<bool> Handle(MettreAJourStockLivreCommand request, CancellationToken cancellationToken)
         {
-            var livre = await _livreRepository.GetByIdAsync(request.Id);
-            if (livre == null)
-                throw new ValidationException(ErreurMessageProvider.GetMessage("EnregistrementNonTrouve", "Livre", request.Id));
+            try
+            {
+                var livre = await _livreRepository.GetByIdAsync(request.Id);
+                if (livre == null)
+                    throw new ValidationException(ErreurMessageProvider.GetMessage("EnregistrementNonTrouve", "Livre", request.Id));
 
-            if (livre.Stock + request.QuantiteAjoutee < 0)
-                throw new ValidationException(ErreurMessageProvider.GetMessage("StockInsuffisant"));
+                await _livreRepository.MettreAJourStock(request.Id, request.QuantiteAjoutee);
+                await _unitOfWork.CompleteAsync();
 
-            await _livreRepository.MettreAJourStock(request.Id, request.QuantiteAjoutee);
-            await _unitOfWork.CompleteAsync();
-
-            return true;
+                return true;
+            }
+            catch (ValidationException ex)
+            {
+                throw new ValidationException(ex.Message, ex);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Une erreur inattendue s'est produite.", ex);
+            }
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using GestionDesLivres.Application.DTO;
+using GestionDesLivres.Domain.Exceptions;
 using GestionDesLivres.Domain.Repositories;
+using GestionDesLivres.Domain.Resources;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -20,6 +22,7 @@ namespace GestionDesLivres.Application.Queries.Livres
 
         public async Task<IEnumerable<LivreDto>> Handle(ObtenirLivresEnStockQuery request, CancellationToken cancellationToken)
         {
+            try { 
             var livres = await _livreRepository.ObtenirLivresEnStock();
 
             return livres.Select(livre => new LivreDto
@@ -30,6 +33,13 @@ namespace GestionDesLivres.Application.Queries.Livres
                 CategorieId = livre.IDCategorie,
                 Stock = livre.Stock
             });
+            }
+            catch (ValidationException ex)
+            {
+                throw new ValidationException(ErreurMessageProvider.GetMessage(ex.Message));
+            }
+
         }
+
     }
 }

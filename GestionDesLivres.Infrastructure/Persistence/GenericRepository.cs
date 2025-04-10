@@ -35,17 +35,6 @@ namespace GestionDesLivres.Infrastructure.Persistence
             await _dbSet.AddAsync(entity);
         }
 
-        //public async Task UpdateAsync(T entity)
-        //{
-
-        //    var _entity = await _dbSet.FindAsync(entity.ID);
-
-        //    if (_entity != null)
-        //    {
-        //        _dbSet.Update(_entity);
-        //    }
-        //}
-
         public async Task UpdateAsync(T entity)
         {
             var entry = _context.Entry(entity);

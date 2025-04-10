@@ -15,8 +15,10 @@ namespace GestionDesLivres.Domain.Entities
         public int Stock { get; set; }
         public Guid IDCategorie { get; set; }
 
-        // Relation avec Categorie
+
         public Categorie? Categorie { get; set; }
+        public ICollection<Emprunt> Emprunts { get; set; } = new List<Emprunt>();
+        public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
 
         public bool EstValide()
         {

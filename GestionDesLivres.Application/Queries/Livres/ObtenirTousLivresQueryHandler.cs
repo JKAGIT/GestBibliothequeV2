@@ -1,5 +1,7 @@
 ﻿using GestionDesLivres.Application.DTO;
+using GestionDesLivres.Domain.Exceptions;
 using GestionDesLivres.Domain.Repositories;
+using GestionDesLivres.Domain.Resources;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -20,17 +22,24 @@ namespace GestionDesLivres.Application.Queries.Livres
 
         public async Task<IEnumerable<LivreDto>> Handle(ObtenirTousLivresQuery request, CancellationToken cancellationToken)
         {
-            var livres = await _livreRepository.ObtenirLivresAvecCategories();
-
-            return livres.Select(livre => new LivreDto
+            try
             {
-                Id = livre.ID,
-                Titre = livre.Titre,
-                Auteur = livre.Auteur,
-                CategorieId = livre.IDCategorie,
-                Libelle = livre.Categorie?.Libelle,
-                Stock = livre.Stock
-            });
+                var livres = await _livreRepository.ObtenirLivresAvecCategories();
+
+                return livres.Select(livre => new LivreDto
+                {
+                    Id = livre.ID,
+                    Titre = livre.Titre,
+                    Auteur = livre.Auteur,
+                    CategorieId = livre.IDCategorie,
+                    Libelle = livre.Categorie?.Libelle,
+                    Stock = livre.Stock
+                });
+            }
+            catch (ValidationException ex)
+            {
+                throw new ValidationException(ErreurMessageProvider.GetMessage(ex.Message));
+            }
         }
     }
 }

@@ -120,6 +120,9 @@
   <data name="DateValide" xml:space="preserve">
     <value>La date {0} doit être valide</value>
   </data>
+  <data name="DonneeInvalid" xml:space="preserve">
+    <value>Les données de l’enregistrement sont invalides ou incomplètes</value>
+  </data>
   <data name="EmpruntEffectue" xml:space="preserve">
     <value>Un emprunt a déjà été effectué pour cette réservation</value>
   </data>
@@ -155,6 +158,9 @@
   </data>
   <data name="ReservationAnnulee" xml:space="preserve">
     <value>La réservation est déjà annulée</value>
+  </data>
+  <data name="ReservationDejaEmpruntee" xml:space="preserve">
+    <value>Cette reservation a été déjà imprunté. Cette action ne peut se poursuivre</value>
   </data>
   <data name="StockEpuise" xml:space="preserve">
     <value>Le livre n'est pas disponible car le stock est épuisé</value>

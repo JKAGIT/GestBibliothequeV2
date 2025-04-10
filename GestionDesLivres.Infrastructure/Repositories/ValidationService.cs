@@ -13,7 +13,6 @@ namespace GestionDesLivres.Infrastructure.Repositories
         {
             if (valeur == null)
             {
-                //throw new ArgumentNullException(nomArgument, string.Format(ErreurMessage.ValeurNulle, paramArgument));
                 throw new ArgumentNullException(nomArgument, string.Format("{ 0 } ne peut pas être nul.Assurez - vous que toutes les données sont correctement fournies.", paramArgument));
             }
         }
@@ -22,7 +21,6 @@ namespace GestionDesLivres.Infrastructure.Repositories
         {
             if (entite == null)
             {
-                //throw new KeyNotFoundException(string.Format(ErreurMessage.EnregistrementNonTrouve, nomEntite, identifiant));
                 throw new KeyNotFoundException(string.Format("L'entité {0} avec l'ID {1} n'a pas été trouvée.", nomEntite, identifiant));
             }
         }
@@ -32,7 +30,6 @@ namespace GestionDesLivres.Infrastructure.Repositories
             if (date == null || date == default)
             {
                 throw new KeyNotFoundException(string.Format("La date {0} doit être valide", typeDate));
-                //throw new KeyNotFoundException(string.Format(ErreurMessage.DateValide, typeDate));
             }
 
         }

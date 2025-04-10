@@ -11,10 +11,16 @@ using GestionDesLivres.Application.Queries.Livres;
 using GestionDesLivres.Application.Commands.Categories;
 using MediatR;
 using GestionDesLivres.Application.Queries.Categories;
+using GestionDesLivres.Application.Commands.Usagers;
+using GestionDesUsagers.Application.Queries.Usagers;
+using GestionDesLivres.Application.Queries;
+using GestionDesLivres.Application.Commands.Retours;
+using GestionDesLivres.Application.Commands.Emprunts;
+using GestionDesLivres.Application.Commands.Reservations;
+using GestionDesLivres.Application.Queries.Emprunts;
+using GestionDesLivres.Application.Queries.Reservations;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
 
 builder.Services.AddDbContext<GestBibliothequeContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("GestBibliothequeConnect")));
@@ -40,13 +46,30 @@ builder.Services.AddMediatR(mdt =>
     mdt.RegisterServicesFromAssembly(typeof(VerifierDisponibiliteLivreQuery).Assembly);
     mdt.RegisterServicesFromAssembly(typeof(VerifierDisponibiliteLivreQuery).Assembly);
     mdt.RegisterServicesFromAssembly(typeof(ObtenirTousLivresQuery).Assembly);
-
     mdt.RegisterServicesFromAssembly(typeof(AjouterCategorieCommand).Assembly);
     mdt.RegisterServicesFromAssembly(typeof(MettreAJourCategorieCommand).Assembly);
     mdt.RegisterServicesFromAssembly(typeof(SupprimerCategorieCommand).Assembly);
     mdt.RegisterServicesFromAssembly(typeof(ObtenirCategorieParCodeQuery).Assembly);
     mdt.RegisterServicesFromAssembly(typeof(ObtenirTousCategoriesQuery).Assembly);
+    mdt.RegisterServicesFromAssembly(typeof(AjouterUsagerCommand).Assembly);
+    mdt.RegisterServicesFromAssembly(typeof(MettreAJourUsagerCommand).Assembly);
+    mdt.RegisterServicesFromAssembly(typeof(SupprimerUsagerCommand).Assembly);
+    mdt.RegisterServicesFromAssembly(typeof(ObtenirUsagerParIdQuery).Assembly);
+    mdt.RegisterServicesFromAssembly(typeof(ObtenirTousUsagersQuery).Assembly);
+    
+    mdt.RegisterServicesFromAssembly(typeof(AjouterRetourCommand).Assembly); 
 
+    mdt.RegisterServicesFromAssembly(typeof(SupprimerEmpruntCommand).Assembly);
+    mdt.RegisterServicesFromAssembly(typeof(ModifierEmpruntCommand).Assembly);
+    mdt.RegisterServicesFromAssembly(typeof(AjouterEmpruntCommand).Assembly);
+    mdt.RegisterServicesFromAssembly(typeof(ObtenirTousLesEmpruntsQuery).Assembly);
+    mdt.RegisterServicesFromAssembly(typeof(ObtenirEmpruntsParUsagerQuery).Assembly);
+
+    mdt.RegisterServicesFromAssembly(typeof(ObtenirToutesReservationsQuery).Assembly);
+    mdt.RegisterServicesFromAssembly(typeof(AjouterReservationCommand).Assembly);
+    mdt.RegisterServicesFromAssembly(typeof(MettreAJourReservationCommand).Assembly);
+    mdt.RegisterServicesFromAssembly(typeof(AnnulerReservationCommand).Assembly);
+    mdt.RegisterServicesFromAssembly(typeof(EmprunterLivreReserveCommand).Assembly);
 });
 
 
@@ -56,9 +79,13 @@ builder.Services.AddScoped(typeof(IEntityValidationService<>), typeof(EntityVali
 builder.Services.AddScoped(typeof(IRecherche<>), typeof(Recherche<>));
 builder.Services.AddScoped<ILivreRepository, LivreRepository>();
 builder.Services.AddScoped<ICategorieRepository, CategorieRepository>();
-
+builder.Services.AddScoped<IUsagerRepository, UsagerRepository>();
+builder.Services.AddScoped<IRetourRepository, RetourRepository>();
+builder.Services.AddScoped<IEmpruntRepository, EmpruntRepository>();
+builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 
 builder.Services.AddAutoMapper(typeof(GestionDesLivresProfile).Assembly);
+
 
 
 builder.Services.AddControllers();
