@@ -24,10 +24,17 @@ namespace GestionDesLivres.Application.Queries.Categories
 
         public async Task<CategorieDto> Handle(ObtenirCategorieParCodeQuery request, CancellationToken cancellationToken)
         {
-            var categorie =  await _categorieRepository.ObtenirCategorieParCode(request.Code);
-            if (categorie == null)
-                throw new ValidationException(ErreurMessageProvider.GetMessage("EnregistrementNonTrouve", "Categorie", request.Code));
-            return _mapper.Map<CategorieDto>(categorie);
+            try
+            {
+                var categorie = await _categorieRepository.ObtenirCategorieParCode(request.Code);
+                if (categorie == null)
+                    throw new ValidationException(ErreurMessageProvider.GetMessage("EnregistrementNonTrouve", "Categorie", request.Code));
+                return _mapper.Map<CategorieDto>(categorie);
+            }
+            catch (ValidationException ex)
+            {
+                throw new ValidationException(ErreurMessageProvider.GetMessage(ex.Message));
+            }
         }
     }
 }

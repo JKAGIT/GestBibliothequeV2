@@ -22,43 +22,55 @@ namespace GestionDesLivres.Application.Commands.Livres
 
         public async Task<bool> Handle(MettreAJourLivreCommand request, CancellationToken cancellationToken)
         {
-            List<string> validationErrors = new List<string>();
-            if (string.IsNullOrEmpty(request.Titre))
-                validationErrors.Add(ErreurMessageProvider.GetMessage("TitreRequis"));
+            try
+            {
+                List<string> validationErrors = new List<string>();
+                if (string.IsNullOrEmpty(request.Titre))
+                    validationErrors.Add(ErreurMessageProvider.GetMessage("TitreRequis"));
 
-            if (string.IsNullOrEmpty(request.Auteur))
-                validationErrors.Add(ErreurMessageProvider.GetMessage("AuteurRequis"));
+                if (string.IsNullOrEmpty(request.Auteur))
+                    validationErrors.Add(ErreurMessageProvider.GetMessage("AuteurRequis"));
 
-            if (request.Stock < 0)
-                validationErrors.Add(ErreurMessageProvider.GetMessage("StockPositif"));
+                if (request.Stock < 0)
+                    validationErrors.Add(ErreurMessageProvider.GetMessage("StockPositif"));
 
-            if (validationErrors.Count > 0)
-                throw new ValidationException(validationErrors);
+                if (validationErrors.Count > 0)
+                    throw new ValidationException(validationErrors);
 
-            // Vérification du livre existe / de la categorie / d'un  livre avec les mêmes infos
-            var livre = await _livreRepository.GetByIdAsync(request.Id);
-            if (livre == null)
-                throw new ValidationException(ErreurMessageProvider.GetMessage("EnregistrementNonTrouve", "Livre", request.Id));
 
-            var categorie = await _unitOfWork.Categories.GetByIdAsync(request.CategorieId);
-            if (categorie == null)
-                throw new ValidationException(ErreurMessageProvider.GetMessage("EnregistrementNonTrouve", "Categorie", request.CategorieId));
+                var livre = await _livreRepository.GetByIdAsync(request.Id);
+                if (livre == null)
+                    throw new ValidationException(ErreurMessageProvider.GetMessage("EnregistrementNonTrouve", "Livre", request.Id));
 
-            if (await _entityValidationService.VerifierExistenceAsync(l => l.Titre == request.Titre && l.Auteur == request.Auteur && l.ID != request.Id))
-                throw new ValidationException(ErreurMessageProvider.GetMessage("EntiteExisteDeja", "Un livre", request.Titre));
+                var categorie = await _unitOfWork.Categories.GetByIdAsync(request.CategorieId);
+                if (categorie == null)
+                    throw new ValidationException(ErreurMessageProvider.GetMessage("EnregistrementNonTrouve", "Categorie", request.CategorieId));
 
-            livre.Titre = request.Titre;
-            livre.Auteur = request.Auteur;
-            livre.IDCategorie = request.CategorieId;
-            livre.Stock = request.Stock;
+                if (await _entityValidationService.VerifierExistenceAsync(l => l.Titre == request.Titre && l.Auteur == request.Auteur && l.ID != request.Id))
+                    throw new ValidationException(ErreurMessageProvider.GetMessage("EntiteExisteDeja", "Un livre", request.Titre));
 
-            if (!livre.EstValide())
-                throw new ValidationException(ErreurMessageProvider.GetMessage("DonneeInvalid"));
+                livre.Titre = request.Titre;
+                livre.Auteur = request.Auteur;
+                livre.IDCategorie = request.CategorieId;
+                livre.Stock = request.Stock;
 
-            await _livreRepository.UpdateAsync(livre);
-            await _unitOfWork.CompleteAsync();
+                if (!livre.EstValide())
+                    throw new ValidationException(ErreurMessageProvider.GetMessage("DonneeInvalid"));
 
-            return true;
+                await _livreRepository.UpdateAsync(livre);
+                await _unitOfWork.CompleteAsync();
+
+                return true;
+            }
+            catch (ValidationException ex)
+            {
+                throw new ValidationException(ex.Message, ex);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Une erreur inattendue s'est produite.", ex);
+            }
+
         }
     }
 }

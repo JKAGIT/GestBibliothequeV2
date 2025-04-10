@@ -11,6 +11,12 @@ namespace GestionDesLivres.Domain.Common.Interfaces
     {
         IGenericRepository<Livre> Livres { get; }
         IGenericRepository<Categorie> Categories { get; }
+        IGenericRepository<Utilisateur> Utilisateurs { get; }
+        IGenericRepository<Usager> Usagers { get; }
+        IGenericRepository<Emprunt> Emprunts { get; }
+        IGenericRepository<Retour> Retours { get; }
+        IGenericRepository<Reservation> Reservations { get; }
+
         Task<int> CompleteAsync();
     }
 }

@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\CommonLib\CommonLib.csproj" />
     <ProjectReference Include="..\GestionDesLivres.Domain\GestionDesLivres.Domain.csproj" />
+    <ProjectReference Include="..\GestionDesLivres.Infrastructure\GestionDesLivres.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

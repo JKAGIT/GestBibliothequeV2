@@ -22,47 +22,56 @@ namespace GestionDesLivres.Application.Commands.Livres
         }
         public async Task<Guid> Handle(AjouterLivreCommand request, CancellationToken cancellationToken)
         {
-            // Validation: verification de la conformité des données fournies
-            List<string> validationErrors = new List<string>();
-
-            if (string.IsNullOrEmpty(request.Titre))
-                validationErrors.Add(ErreurMessageProvider.GetMessage("TitreRequis"));
-
-            if (string.IsNullOrEmpty(request.Auteur))
-                validationErrors.Add(ErreurMessageProvider.GetMessage("AuteurRequis"));
-
-            if (request.Stock < 0)
-                validationErrors.Add(ErreurMessageProvider.GetMessage("StockPositif"));
-
-            if (validationErrors.Count > 0)
-                throw new ValidationException(validationErrors);
-
-
-            // Test catégorie existe
-            var categorie = await _unitOfWork.Categories.GetByIdAsync(request.CategorieId);
-            if (categorie == null)
-                throw new ValidationException(ErreurMessageProvider.GetMessage("EnregistrementNonTrouve", "Categorie", request.CategorieId));
-
-            // le livre existe déjà
-            if (await _entityValidationService.VerifierExistenceAsync(l => l.Titre == request.Titre && l.Auteur == request.Auteur))
-                throw new ValidationException(ErreurMessageProvider.GetMessage("EntiteExisteDeja", "Un livre", request.Titre));
-
-
-            var livre = new Livre
+            try
             {
-                ID = Guid.NewGuid(),
-                Titre = request.Titre,
-                Auteur = request.Auteur,
-                IDCategorie = request.CategorieId,
-                Stock = request.Stock
-            };
-            if (!livre.EstValide())
-                throw new ValidationException(ErreurMessageProvider.GetMessage("DonneeInvalid"));
+                List<string> validationErrors = new List<string>();
 
-            await _livreRepository.AddAsync(livre);
-            await _unitOfWork.CompleteAsync();
+                if (string.IsNullOrEmpty(request.Titre))
+                    validationErrors.Add(ErreurMessageProvider.GetMessage("TitreRequis"));
 
-            return livre.ID;
+                if (string.IsNullOrEmpty(request.Auteur))
+                    validationErrors.Add(ErreurMessageProvider.GetMessage("AuteurRequis"));
+
+                if (request.Stock < 0)
+                    validationErrors.Add(ErreurMessageProvider.GetMessage("StockPositif"));
+
+                if (validationErrors.Count > 0)
+                    throw new ValidationException(validationErrors);
+
+
+                var categorie = await _unitOfWork.Categories.GetByIdAsync(request.CategorieId);
+                if (categorie == null)
+                    throw new ValidationException(ErreurMessageProvider.GetMessage("EnregistrementNonTrouve", "Categorie", request.CategorieId));
+
+
+                if (await _entityValidationService.VerifierExistenceAsync(l => l.Titre == request.Titre))
+                    throw new ValidationException(ErreurMessageProvider.GetMessage("EntiteExisteDeja", "Un livre", request.Titre));
+
+
+                var livre = new Livre
+                {
+                    ID = Guid.NewGuid(),
+                    Titre = request.Titre,
+                    Auteur = request.Auteur,
+                    IDCategorie = request.CategorieId,
+                    Stock = request.Stock
+                };
+                if (!livre.EstValide())
+                    throw new ValidationException(ErreurMessageProvider.GetMessage("DonneeInvalid"));
+
+                await _livreRepository.AddAsync(livre);
+                await _unitOfWork.CompleteAsync();
+
+                return livre.ID;
+            }
+            catch (ValidationException ex)
+            {
+                throw new ValidationException(ex.Message, ex);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Une erreur inattendue s'est produite.", ex);
+            }
         }
     }
 }

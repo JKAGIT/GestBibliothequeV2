@@ -43,10 +43,47 @@ namespace GestionDesLivres.Infrastructure.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("Code")
-                        .IsUnique();
-
                     b.ToTable("Categorie");
+                });
+
+            modelBuilder.Entity("GestionDesLivres.Domain.Entities.Emprunt", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DateCreation")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateDebut")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateRetourPrevue")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("EstRendu")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("IDLivre")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("IDReservation")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("IDUsager")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("IDLivre");
+
+                    b.HasIndex("IDReservation")
+                        .IsUnique()
+                        .HasFilter("[IDReservation] IS NOT NULL");
+
+                    b.HasIndex("IDUsager");
+
+                    b.ToTable("Emprunt");
                 });
 
             modelBuilder.Entity("GestionDesLivres.Domain.Entities.Livre", b =>
@@ -79,6 +116,159 @@ namespace GestionDesLivres.Infrastructure.Migrations
                     b.ToTable("Livre");
                 });
 
+            modelBuilder.Entity("GestionDesLivres.Domain.Entities.Reservation", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("Annuler")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("DateCreation")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateDebut")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateRetourEstimee")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("IDLivre")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("IDUsager")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("IDLivre");
+
+                    b.HasIndex("IDUsager");
+
+                    b.ToTable("Reservation");
+                });
+
+            modelBuilder.Entity("GestionDesLivres.Domain.Entities.Retour", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DateCreation")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateRetour")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("IDEmprunt")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("IDEmprunt")
+                        .IsUnique();
+
+                    b.ToTable("Retour");
+                });
+
+            modelBuilder.Entity("GestionDesLivres.Domain.Entities.Usager", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Courriel")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateCreation")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Nom")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Prenoms")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Telephone")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Usager");
+                });
+
+            modelBuilder.Entity("GestionDesLivres.Domain.Entities.Utilisateur", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Courriel")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateCreation")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Matricule")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("Nom")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Prenoms")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Telephone")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Utilisateur");
+                });
+
+            modelBuilder.Entity("GestionDesLivres.Domain.Entities.Emprunt", b =>
+                {
+                    b.HasOne("GestionDesLivres.Domain.Entities.Livre", "Livre")
+                        .WithMany("Emprunts")
+                        .HasForeignKey("IDLivre")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GestionDesLivres.Domain.Entities.Reservation", "Reservation")
+                        .WithOne("Emprunt")
+                        .HasForeignKey("GestionDesLivres.Domain.Entities.Emprunt", "IDReservation")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GestionDesLivres.Domain.Entities.Usager", "Usager")
+                        .WithMany("Emprunts")
+                        .HasForeignKey("IDUsager")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Livre");
+
+                    b.Navigation("Reservation");
+
+                    b.Navigation("Usager");
+                });
+
             modelBuilder.Entity("GestionDesLivres.Domain.Entities.Livre", b =>
                 {
                     b.HasOne("GestionDesLivres.Domain.Entities.Categorie", "Categorie")
@@ -90,9 +280,63 @@ namespace GestionDesLivres.Infrastructure.Migrations
                     b.Navigation("Categorie");
                 });
 
+            modelBuilder.Entity("GestionDesLivres.Domain.Entities.Reservation", b =>
+                {
+                    b.HasOne("GestionDesLivres.Domain.Entities.Livre", "Livre")
+                        .WithMany("Reservations")
+                        .HasForeignKey("IDLivre")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GestionDesLivres.Domain.Entities.Usager", "Usager")
+                        .WithMany("Reservations")
+                        .HasForeignKey("IDUsager")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Livre");
+
+                    b.Navigation("Usager");
+                });
+
+            modelBuilder.Entity("GestionDesLivres.Domain.Entities.Retour", b =>
+                {
+                    b.HasOne("GestionDesLivres.Domain.Entities.Emprunt", "Emprunt")
+                        .WithOne("Retours")
+                        .HasForeignKey("GestionDesLivres.Domain.Entities.Retour", "IDEmprunt")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Emprunt");
+                });
+
             modelBuilder.Entity("GestionDesLivres.Domain.Entities.Categorie", b =>
                 {
                     b.Navigation("Livres");
+                });
+
+            modelBuilder.Entity("GestionDesLivres.Domain.Entities.Emprunt", b =>
+                {
+                    b.Navigation("Retours");
+                });
+
+            modelBuilder.Entity("GestionDesLivres.Domain.Entities.Livre", b =>
+                {
+                    b.Navigation("Emprunts");
+
+                    b.Navigation("Reservations");
+                });
+
+            modelBuilder.Entity("GestionDesLivres.Domain.Entities.Reservation", b =>
+                {
+                    b.Navigation("Emprunt");
+                });
+
+            modelBuilder.Entity("GestionDesLivres.Domain.Entities.Usager", b =>
+                {
+                    b.Navigation("Emprunts");
+
+                    b.Navigation("Reservations");
                 });
 #pragma warning restore 612, 618
         }

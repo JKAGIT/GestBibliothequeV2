@@ -25,22 +25,28 @@ namespace GestionDesLivres.Application.Queries.Livres
 
         public async Task<IEnumerable<LivreDto>> Handle(ObtenirLivresParCategorieQuery request, CancellationToken cancellationToken)
         {
-            // Vérifier que la catégorie existe
-            var categorie = await _unitOfWork.Categories.GetByIdAsync(request.CategorieId);
-            if (categorie == null)
-                throw new ValidationException(ErreurMessageProvider.GetMessage("EnregistrementNonTrouve", "Categorie", request.CategorieId));
-
-            var livres = await _livreRepository.ObtenirLivresParCategorie(request.CategorieId);
-
-            return livres.Select(livre => new LivreDto
+            try
             {
-                Id = livre.ID,
-                Titre = livre.Titre,
-                Auteur = livre.Auteur,
-                CategorieId = livre.IDCategorie,
-                Libelle = categorie.Libelle,
-                Stock = livre.Stock
-            });
+                var categorie = await _unitOfWork.Categories.GetByIdAsync(request.CategorieId);
+                if (categorie == null)
+                    throw new ValidationException(ErreurMessageProvider.GetMessage("EnregistrementNonTrouve", "Categorie", request.CategorieId));
+
+                var livres = await _livreRepository.ObtenirLivresParCategorie(request.CategorieId);
+
+                return livres.Select(livre => new LivreDto
+                {
+                    Id = livre.ID,
+                    Titre = livre.Titre,
+                    Auteur = livre.Auteur,
+                    CategorieId = livre.IDCategorie,
+                    Libelle = categorie.Libelle,
+                    Stock = livre.Stock
+                });
+            }
+            catch (ValidationException ex)
+            {
+                throw new ValidationException(ErreurMessageProvider.GetMessage(ex.Message));
+            }
         }
     }
 }

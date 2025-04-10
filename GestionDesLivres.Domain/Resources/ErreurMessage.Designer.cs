@@ -70,6 +70,15 @@ namespace GestionDesLivres.Domain.Resources {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à Les données de l’enregistrement sont invalides ou incomplètes.
+        /// </summary>
+        internal static string DonneeInvalid {
+            get {
+                return ResourceManager.GetString("DonneeInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à Un emprunt a déjà été effectué pour cette réservation.
         /// </summary>
         internal static string EmpruntEffectue {
@@ -156,6 +165,15 @@ namespace GestionDesLivres.Domain.Resources {
         internal static string ReservationAnnulee {
             get {
                 return ResourceManager.GetString("ReservationAnnulee", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Cette reservation a été déjà imprunté. Cette action ne peut se poursuivre.
+        /// </summary>
+        internal static string ReservationDejaEmpruntee {
+            get {
+                return ResourceManager.GetString("ReservationDejaEmpruntee", resourceCulture);
             }
         }
         

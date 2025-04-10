@@ -27,20 +27,31 @@ namespace GestionDesLivres.Application.Commands.Categories
         }
         public async Task<bool> Handle(SupprimerCategorieCommand request, CancellationToken cancellationToken)
         {
-            var categorieASupprimer = await _recherche.GetAll()
+            try
+            {
+                var categorieASupprimer = await _recherche.GetAll()
                                                  .Include(c => c.Livres)
                                                  .FirstOrDefaultAsync(c => c.ID == request.Id);
 
-            if (categorieASupprimer == null)
-                throw new ValidationException(ErreurMessageProvider.GetMessage("EnregistrementNonTrouve", "Categorie", request.Id));
+                if (categorieASupprimer == null)
+                    throw new ValidationException(ErreurMessageProvider.GetMessage("EnregistrementNonTrouve", "Categorie", request.Id));
 
-            if (categorieASupprimer.Livres != null && categorieASupprimer.Livres.Any())
-                throw new ValidationException(ErreurMessageProvider.GetMessage("ErreurSuppressionEntiteLiee", "une catégorie", "livres"));
+                if (categorieASupprimer.Livres != null && categorieASupprimer.Livres.Any())
+                    throw new ValidationException(ErreurMessageProvider.GetMessage("ErreurSuppressionEntiteLiee", "une catégorie", "livres"));
 
-            await _categorieRepository.DeleteAsync(request.Id);
-            await _unitOfWork.CompleteAsync();
+                await _categorieRepository.DeleteAsync(request.Id);
+                await _unitOfWork.CompleteAsync();
 
-            return true;
+                return true;
+            }
+            catch (ValidationException ex)
+            {
+                throw new ValidationException(ex.Message, ex);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Une erreur inattendue s'est produite.", ex);
+            }
         }
     }
 }
