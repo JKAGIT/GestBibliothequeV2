@@ -4,7 +4,7 @@
 @inject NavigationManager Navigation
 @using CommonLib.GestBibliotheque.Utilitaires
 
-<h3 class="mb-3">Liste des Emprunts Actifs</h3>
+<h3 class="mb-3">Liste des emprunts actifs</h3>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <input type="text" class="form-control" placeholder="Rechercher" @bind="searchTerm" @oninput="OnSearchInput" />
@@ -17,10 +17,7 @@
 
 @if (isLoading)
 {
-    <div class="alert alert-warning d-flex align-items-center">
-        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-        Chargement des données en cours...
-    </div>
+    <LoadingSpinner />
 }
 else if (pagedEmpruntsActifs == null)
 {
@@ -53,14 +50,9 @@ else
                         <td>@emprunt.DateDebut.ToString("yyyy-MM-dd")</td>
                         <td>@emprunt.DateRetourPrevue.ToString("yyyy-MM-dd")</td>
                         <td>
-                            @if (emprunt.EnRetard)
-                            {
-                                <span style="color:red;">En retard</span>
-                            }
-                            else
-                            {
-                                <span style="color:green;">À jour</span>
-                            }
+                            <span style="color:@(emprunt.EnRetard ? "red" : "green")">
+                                @(emprunt.EnRetard ? "En retard" : "À jour")
+                            </span>
                         </td>
                         <td>
                             <a href="/Emprunt/Modifier-Emprunts/@emprunt.ID" class="btn btn-primary btn-sm me-2">Modifier</a>
@@ -73,24 +65,10 @@ else
         </table>
     </div>
 
-    <!-- Pagination -->
-    <nav>
-        <ul class="pagination">
-            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                <a class="page-link" @onclick="PreviousPage">Précédent</a>
-            </li>
-            @for (int i = 1; i <= totalPages; i++)
-            {
-                <li class="page-item @(currentPage == i ? "active" : "")">
-                    <a class="page-link" @onclick="() => GoToPage(i)">@i</a>
-                </li>
-            }
-            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
-                <a class="page-link" @onclick="NextPage">Suivant</a>
-            </li>
-        </ul>
-    </nav>
+    <!-- Pagination centralisée -->
+    <Pagination CurrentPage="currentPage" TotalPages="totalPages" OnPageChanged="HandlePageChange" />
 }
+
 @code {
     private List<EmpruntDto>? empruntsActifs;
     private List<EmpruntDto> pagedEmpruntsActifs = new();
@@ -102,11 +80,9 @@ else
 
     private string? Message;
     private bool Success;
-
     private bool rechercheEffectuee = false;
     private bool isLoading = true;
 
-    // Liste filtrée
     private List<EmpruntDto> filteredEmpruntsActifs => string.IsNullOrWhiteSpace(searchTerm)
         ? empruntsActifs ?? new List<EmpruntDto>()
         : empruntsActifs!.Where(e =>
@@ -147,31 +123,10 @@ else
         }
     }
 
-    private void PreviousPage()
+    private void HandlePageChange(int page)
     {
-        if (currentPage > 1)
-        {
-            currentPage--;
-            UpdatePagedEmpruntsActifs();
-        }
-    }
-
-    private void NextPage()
-    {
-        if (currentPage < totalPages)
-        {
-            currentPage++;
-            UpdatePagedEmpruntsActifs();
-        }
-    }
-
-    private void GoToPage(int page)
-    {
-        if (page >= 1 && page <= totalPages)
-        {
-            currentPage = page;
-            UpdatePagedEmpruntsActifs();
-        }
+        currentPage = page;
+        UpdatePagedEmpruntsActifs();
     }
 
     private async Task OnSearchInput(ChangeEventArgs e)

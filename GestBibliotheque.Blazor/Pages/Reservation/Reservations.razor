@@ -5,10 +5,11 @@
 @inject IJSRuntime JSRuntime
 @using CommonLib.GestBibliotheque.Utilitaires
 
-<h3 class="text-center mb-4">Gestion des Réservations</h3>
+<h3 class="text-center mb-4">Gestion des réservations</h3>
 
-<div class="mb-3">
+<div class="mb-3 d-flex justify-content-between align-items-center">
     <a href="/Reservation/Ajout-Reservations" class="btn btn-primary">Ajouter une Réservation</a>
+    <input type="text" class="form-control w-50" placeholder="Rechercher" @bind="searchTerm" @oninput="OnSearchInput" />
 </div>
 
 @if (!string.IsNullOrEmpty(Message))
@@ -18,18 +19,15 @@
 
 @if (Loading)
 {
-    <div class="alert alert-warning d-flex align-items-center">
-        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-        Chargement des données en cours...
-    </div>
+    <LoadingSpinner />
 }
-else if (reservations == null)
+else if (pagedReservations == null)
 {
     <p class="alert alert-danger">Erreur lors du chargement des réservations.</p>
 }
-else if (!reservations.Any())
+else if (!pagedReservations.Any() && rechercheEffectuee)
 {
-    <p class="alert alert-info">Aucune réservation disponible.</p>
+    <p class="alert alert-info">Aucune réservation ne correspond à la recherche.</p>
 }
 else
 {
@@ -37,7 +35,7 @@ else
         <table class="table table-striped table-hover table-bordered">
             <thead>
                 <tr>
-                    <th>Nom &amp; Prénoms</th>
+                    <th>Nom & Prénoms</th>
                     <th>Livre</th>
                     <th>Date Début</th>
                     <th>Date Retour Estimée</th>
@@ -47,7 +45,7 @@ else
                 </tr>
             </thead>
             <tbody>
-                @foreach (var reservation in PagedReservations)
+                @foreach (var reservation in pagedReservations)
                 {
                     <tr>
                         <td>@reservation.NomCompletUsager</td>
@@ -74,38 +72,30 @@ else
         </table>
     </div>
 
-    <!-- Pagination -->
-    <nav>
-        <ul class="pagination">
-            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                <a class="page-link" @onclick="PrevPage">Précédent</a>
-            </li>
-            @for (int i = 1; i <= totalPages; i++)
-            {
-                <li class="page-item @(currentPage == i ? "active" : "")">
-                    <a class="page-link" @onclick="() => GoToPage(i)">@i</a>
-                </li>
-            }
-            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
-                <a class="page-link" @onclick="NextPage">Suivant</a>
-            </li>
-        </ul>
-    </nav>
+    @* Pagination *@
+    <Pagination CurrentPage="currentPage" TotalPages="totalPages" OnPageChanged="HandlePageChanged" />
 }
+
 @code {
     private List<ReservationDto> reservations = new();
+    private List<ReservationDto> pagedReservations = new();
+    private string searchTerm = string.Empty;
+
     private int currentPage = 1;
     private int pageSize = 10;
     private string? Message;
     private bool Success;
     private bool Loading = true;
-    private int totalPages => (reservations.Count > 0)
-        ? (int)Math.Ceiling(reservations.Count / (double)pageSize)
-        : 1;
+    private bool rechercheEffectuee = false;
 
-    private IEnumerable<ReservationDto> PagedReservations => reservations
-        .Skip((currentPage - 1) * pageSize)
-        .Take(pageSize);
+    private int totalPages => (int)Math.Ceiling(filteredReservations.Count / (double)pageSize);
+
+    private List<ReservationDto> filteredReservations => string.IsNullOrWhiteSpace(searchTerm)
+        ? reservations
+        : reservations.Where(r =>
+            r.NomCompletUsager.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+            r.TitreLivre.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+            r.StatutReservation.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
 
     protected override async Task OnInitializedAsync()
     {
@@ -120,11 +110,12 @@ else
             reservations = await Http.GetFromJsonAsync<List<ReservationDto>>("/api-bibliotheque/reservation");
             reservations = reservations.Where(r => !r.Annuler && !r.EstEmprunte).ToList();
             currentPage = 1;
+            UpdatePagedReservations();
             Success = true;
         }
         catch (Exception ex)
         {
-            reservations = null;
+            reservations = new();
             Message = $"Erreur : {ex.Message}";
             Success = false;
         }
@@ -134,9 +125,34 @@ else
         }
     }
 
-    private void PrevPage() { if (currentPage > 1) currentPage--; }
-    private void NextPage() { if (currentPage < totalPages) currentPage++; }
-    private void GoToPage(int page) { if (page >= 1 && page <= totalPages) currentPage = page; }
+    private void UpdatePagedReservations()
+    {
+        if (filteredReservations.Any())
+        {
+            pagedReservations = filteredReservations
+                .Skip((currentPage - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+        }
+        else
+        {
+            pagedReservations = new List<ReservationDto>();
+        }
+    }
+
+    private void HandlePageChanged(int page)
+    {
+        currentPage = page;
+        UpdatePagedReservations();
+    }
+
+    private async Task OnSearchInput(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? string.Empty;
+        currentPage = 1;
+        rechercheEffectuee = true;
+        UpdatePagedReservations();
+    }
 
     private async Task ConfirmerAnnulation(Guid id)
     {

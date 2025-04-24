@@ -2,7 +2,7 @@
 @inject HttpClient Http
 @using GestBibliotheque.Blazor.Models
 
-<h3 class="mb-4">Vérifier la Disponibilité du Livre</h3>
+<h3 class="mb-4">Vérifier la disponibilité du livre</h3>
 
 @if (!string.IsNullOrEmpty(Message))
 {
@@ -10,7 +10,6 @@
 }
 
 <div class="form-group mb-3">
-    <label for="searchLivre" class="form-label">Rechercher un livre :</label>
     <input id="searchLivre" class="form-control" @bind="searchTerm" @bind:event="oninput" placeholder="Rechercher un livre..." />
 </div>
 

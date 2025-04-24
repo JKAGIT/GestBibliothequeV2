@@ -1,11 +1,10 @@
 ﻿@page "/Reservation/Emprunt-Reservations/{id:guid}"
-{id:guid}
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @using CommonLib.GestBibliotheque.Utilitaires
 @using GestBibliotheque.Blazor.Models
 
-<h3 class="text-center mb-4">Créer un Emprunt à partir d'une Réservation</h3>
+<h3 class="text-center mb-4">Emprunter un livre reservé</h3>
 
 @if (!string.IsNullOrEmpty(Message))
 {
@@ -14,10 +13,7 @@
 
 @if (reservation == null)
 {
-    <div class="alert alert-warning d-flex align-items-center">
-        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-        Chargement des données en cours...
-    </div>
+    <LoadingSpinner />
 }
 else
 {
@@ -49,7 +45,7 @@ else
             <InputDate id="dateRetourPrevue" @bind-Value="emprunt.DateRetourPrevue" class="form-control" />
         </div>
 
-        <button type="submit" class="btn btn-success" @onclick="AjouterEmprunt">Créer l'emprunt</button>
+        <button type="submit" class="btn btn-success" @onclick="AjouterEmprunt">Valider l'emprunt</button>
         <button type="button" class="btn btn-secondary" @onclick="RetourListe">Annuler</button>
     </EditForm>
 }

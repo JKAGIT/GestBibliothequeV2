@@ -13,10 +13,7 @@
 
 @if (livre == null)
 {
-    <div class="alert alert-warning d-flex align-items-center">
-        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-        Chargement des données en cours...
-    </div>
+    <LoadingSpinner />
 }
 else
 {

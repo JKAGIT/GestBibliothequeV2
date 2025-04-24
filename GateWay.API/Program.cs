@@ -6,13 +6,22 @@ using Ocelot.Middleware;
 using Microsoft.OpenApi.Models;
 using MMLib.SwaggerForOcelot.DependencyInjection;
 using MMLib.SwaggerForOcelot.Middleware;
+using CacheManager.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration
-    .AddJsonFile("ocelot.json", optional: false, reloadOnChange: true); 
+    .AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+
+// Configuration explicite de CacheManager avec un type générique `object`
+builder.Services.AddSingleton<ICacheManager<object>>(CacheFactory.Build(settings =>
+{
+    settings.WithDictionaryHandle(); // Cache en mémoire basé sur un dictionnaire
+}));
+
 
 builder.Services.AddOcelot();
+
 
 
 builder.Services.AddCors(options =>
