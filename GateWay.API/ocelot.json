@@ -52,7 +52,10 @@
       ],
       "UpstreamPathTemplate": "/api-bibliotheque/categorie/categorieParId/{id}",
       "UpstreamHttpMethod": [ "GET" ],
-      "SwaggerKey": "Bibliotheque"
+      "SwaggerKey": "Bibliotheque",
+      "CacheOptions": {
+        "TtlSeconds": 60
+      }
     },
     {
       "DownstreamPathTemplate": "/api/categorie/categorieParCode/{code}",
@@ -65,7 +68,10 @@
       ],
       "UpstreamPathTemplate": "/api-bibliotheque/categorie/categorieParCode/{code}",
       "UpstreamHttpMethod": [ "GET" ],
-      "SwaggerKey": "Bibliotheque"
+      "SwaggerKey": "Bibliotheque",
+      "CacheOptions": {
+        "TtlSeconds": 60
+      }
     },
     {
       "DownstreamPathTemplate": "/api/categorie",
@@ -78,7 +84,10 @@
       ],
       "UpstreamPathTemplate": "/api-bibliotheque/categorie",
       "UpstreamHttpMethod": [ "GET" ],
-      "SwaggerKey": "Bibliotheque"
+      "SwaggerKey": "Bibliotheque",
+      "CacheOptions": {
+        "TtlSeconds": 60
+      }
     },
 
     // Livre Routes
@@ -132,7 +141,10 @@
       ],
       "UpstreamPathTemplate": "/api-bibliotheque/livre/{id}",
       "UpstreamHttpMethod": [ "GET" ],
-      "SwaggerKey": "Bibliotheque"
+      "SwaggerKey": "Bibliotheque",
+      "CacheOptions": {
+        "TtlSeconds": 60
+      }
     },
     {
       "DownstreamPathTemplate": "/api/livre/en-stock",
@@ -145,7 +157,10 @@
       ],
       "UpstreamPathTemplate": "/api-bibliotheque/livre/en-stock",
       "UpstreamHttpMethod": [ "GET" ],
-      "SwaggerKey": "Bibliotheque"
+      "SwaggerKey": "Bibliotheque",
+      "CacheOptions": {
+        "TtlSeconds": 60
+      }
     },
     {
       "DownstreamPathTemplate": "/api/livre",
@@ -158,7 +173,10 @@
       ],
       "UpstreamPathTemplate": "/api-bibliotheque/livre",
       "UpstreamHttpMethod": [ "GET" ],
-      "SwaggerKey": "Bibliotheque"
+      "SwaggerKey": "Bibliotheque",
+      "CacheOptions": {
+        "TtlSeconds": 60
+      }
     },
     {
       "DownstreamPathTemplate": "/api/livre/categorie/{categorieId}",
@@ -171,7 +189,10 @@
       ],
       "UpstreamPathTemplate": "/api-bibliotheque/livre/categorie/{categorieId}",
       "UpstreamHttpMethod": [ "GET" ],
-      "SwaggerKey": "Bibliotheque"
+      "SwaggerKey": "Bibliotheque",
+      "CacheOptions": {
+        "TtlSeconds": 60
+      }
     },
     {
       "DownstreamPathTemplate": "/api/livre/disponibilite/{id}",
@@ -184,7 +205,10 @@
       ],
       "UpstreamPathTemplate": "/api-bibliotheque/livre/disponibilite/{id}",
       "UpstreamHttpMethod": [ "GET" ],
-      "SwaggerKey": "Bibliotheque"
+      "SwaggerKey": "Bibliotheque",
+      "CacheOptions": {
+        "TtlSeconds": 60
+      }
     },
 
     // Usager Routes
@@ -238,7 +262,10 @@
       ],
       "UpstreamPathTemplate": "/api-bibliotheque/usagers/usagerParId/{id}",
       "UpstreamHttpMethod": [ "GET" ],
-      "SwaggerKey": "Bibliotheque"
+      "SwaggerKey": "Bibliotheque",
+      "CacheOptions": {
+        "TtlSeconds": 60
+      }
     },
     {
       "DownstreamPathTemplate": "/api/usagers",
@@ -251,7 +278,10 @@
       ],
       "UpstreamPathTemplate": "/api-bibliotheque/usagers",
       "UpstreamHttpMethod": [ "GET" ],
-      "SwaggerKey": "Bibliotheque"
+      "SwaggerKey": "Bibliotheque",
+      "CacheOptions": {
+        "TtlSeconds": 60
+      }
     },
 
     // Emprunt Routes
@@ -266,7 +296,10 @@
       ],
       "UpstreamPathTemplate": "/api-bibliotheque/emprunts",
       "UpstreamHttpMethod": [ "GET" ],
-      "SwaggerKey": "Bibliotheque"
+      "SwaggerKey": "Bibliotheque",
+      "CacheOptions": {
+        "TtlSeconds": 60
+      }
     },
     {
       "DownstreamPathTemplate": "/api/emprunts/usager/{idUsager}",
@@ -279,7 +312,10 @@
       ],
       "UpstreamPathTemplate": "/api-bibliotheque/emprunts/usager/{idUsager}",
       "UpstreamHttpMethod": [ "GET" ],
-      "SwaggerKey": "Bibliotheque"
+      "SwaggerKey": "Bibliotheque",
+      "CacheOptions": {
+        "TtlSeconds": 60
+      }
     },
 
     {
@@ -293,7 +329,10 @@
       ],
       "UpstreamPathTemplate": "/api-bibliotheque/emprunts/empruntParId/{id}",
       "UpstreamHttpMethod": [ "GET" ],
-      "SwaggerKey": "Bibliotheque"
+      "SwaggerKey": "Bibliotheque",
+      "CacheOptions": {
+        "TtlSeconds": 60
+      }
     },
     {
       "DownstreamPathTemplate": "/api/emprunts/Ajouter",
@@ -347,7 +386,10 @@
       ],
       "UpstreamPathTemplate": "/api-bibliotheque/reservation",
       "UpstreamHttpMethod": [ "GET" ],
-      "SwaggerKey": "Bibliotheque"
+      "SwaggerKey": "Bibliotheque",
+      "CacheOptions": {
+        "TtlSeconds": 60
+      }
     },
     {
       "DownstreamPathTemplate": "/api/reservation/reservationParId/{id}",
@@ -360,7 +402,10 @@
       ],
       "UpstreamPathTemplate": "/api-bibliotheque/reservation/reservationParId/{id}",
       "UpstreamHttpMethod": [ "GET" ],
-      "SwaggerKey": "Bibliotheque"
+      "SwaggerKey": "Bibliotheque",
+      "CacheOptions": {
+        "TtlSeconds": 60
+      }
     },
 
     {
@@ -431,7 +476,7 @@
       "UpstreamHttpMethod": [ "POST" ],
       "SwaggerKey": "Bibliotheque"
     },
-    //Route operation    
+    //Route operation
     {
       "DownstreamPathTemplate": "/api/Operation/verifdisponiblite/{id}",
       "DownstreamScheme": "https",
@@ -443,7 +488,10 @@
       ],
       "UpstreamPathTemplate": "/api-bibliotheque/operation/verifdisponiblite/{id}",
       "UpstreamHttpMethod": [ "GET" ],
-      "SwaggerKey": "Bibliotheque"
+      "SwaggerKey": "Bibliotheque",
+      "CacheOptions": {
+        "TtlSeconds": 60
+      }
     },
     {
       "DownstreamPathTemplate": "/api/Operation/disponible",
@@ -456,7 +504,10 @@
       ],
       "UpstreamPathTemplate": "/api-bibliotheque/operation/disponible",
       "UpstreamHttpMethod": [ "GET" ],
-      "SwaggerKey": "Bibliotheque"
+      "SwaggerKey": "Bibliotheque",
+      "CacheOptions": {
+        "TtlSeconds": 60
+      }
     },
     {
       "DownstreamPathTemplate": "/api/Operation/stock/{id}",

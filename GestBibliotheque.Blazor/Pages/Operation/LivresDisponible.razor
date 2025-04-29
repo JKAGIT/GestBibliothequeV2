@@ -1,93 +1,76 @@
 ﻿@page "/Operation/LivresDisponible"
 @inject HttpClient Http
 @using GestBibliotheque.Blazor.Models
+@using CommonLib.GestBibliotheque.Utilitaires
 
-<h3 class="mb-3">Liste des Livres Disponibles</h3>
-
-<div class="mb-3">
-    <label for="searchLivre" class="form-label">Rechercher un livre :</label>
-    <input id="searchLivre" @bind="searchTerm" @bind:event="oninput" class="form-control" placeholder="Rechercher par titre ou auteur..." />
-</div>
-
-@if (!string.IsNullOrEmpty(Message))
-{
-    <div class="alert @(Success ? "alert-success" : "alert-danger")">@Message</div>
-}
+<h3 class="mb-3">Liste des livres disponibles</h3>
 
 @if (isLoading)
 {
-    <div class="alert alert-warning d-flex align-items-center">
-        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-        Chargement des données en cours...
-    </div>
-}
-else if (!PagedFilteredLivres.Any())
-{
-    <p class="alert alert-info">Aucun livre disponible trouvé.</p>
+    <LoadingSpinner />
 }
 else
 {
-    <div class="table-responsive">
-        <table class="table table-striped table-hover">
-            <thead>
-                <tr>
-                    <th>Titre</th>
-                    <th>Auteur</th>
-                    <th>Catégorie</th>
-                    <th>Stock</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var livre in PagedFilteredLivres)
-                {
-                    <tr>
-                        <td>@livre.Titre</td>
-                        <td>@livre.Auteur</td>
-                        <td>@livre.Libelle</td>
-                        <td>@livre.Stock</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+    <div class="mb-3">
+        <input id="searchLivre" @bind="searchTerm" @bind:event="oninput" class="form-control" placeholder="Rechercher par titre ou auteur..." />
     </div>
 
-    <!-- Pagination -->
-    <nav>
-        <ul class="pagination">
-            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                <a class="page-link" @onclick="PreviousPage">Précédent</a>
-            </li>
-            @for (int i = 1; i <= totalPages; i++)
-            {
-                <li class="page-item @(currentPage == i ? "active" : "")">
-                    <a class="page-link" @onclick="() => GoToPage(i)">@i</a>
-                </li>
-            }
-            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
-                <a class="page-link" @onclick="NextPage">Suivant</a>
-            </li>
-        </ul>
-    </nav>
-}
-@code {
-    private List<LivreDto> livres = new();
-    private List<LivreDto> PagedFilteredLivres => FilteredLivres
-        .Skip((currentPage - 1) * pageSize)
-        .Take(pageSize)
-        .ToList();
+    @if (!string.IsNullOrEmpty(Message))
+    {
+        <div class="alert @(Success ? "alert-success" : "alert-danger")">@Message</div>
+    }
 
+    @if (!pagedLivresDisponibles.Any() && rechercheEffectuee)
+    {
+        <p class="alert alert-info">Aucun livre disponible ne correspond à la recherche.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Titre</th>
+                        <th>Auteur</th>
+                        <th>Catégorie</th>
+                        <th>Stock</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var livre in pagedLivresDisponibles)
+                    {
+                        <tr>
+                            <td>@livre.Titre</td>
+                            <td>@livre.Auteur</td>
+                            <td>@livre.Libelle</td>
+                            <td>@livre.Stock</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <Pagination CurrentPage="currentPage" TotalPages="totalPages" OnPageChanged="HandlePageChange" />
+    }
+}
+
+@code {
+    private List<LivreDto>? livresDisponibles;
+    private List<LivreDto> pagedLivresDisponibles = new();
     private string searchTerm = string.Empty;
-    private bool isLoading = true;
-    private string? Message;
-    private bool Success;
 
     private int currentPage = 1;
     private int pageSize = 10;
-    private int totalPages => (int)Math.Ceiling(FilteredLivres.Count / (double)pageSize);
+    private int totalPages => (int)Math.Ceiling(filteredLivres.Count / (double)pageSize);
 
-    private List<LivreDto> FilteredLivres => string.IsNullOrWhiteSpace(searchTerm)
-        ? livres
-        : livres.Where(l =>
+    private string? Message;
+    private bool Success;
+    private bool isLoading = true;
+    private bool rechercheEffectuee = false;
+
+    private List<LivreDto> filteredLivres => string.IsNullOrWhiteSpace(searchTerm)
+        ? livresDisponibles ?? new List<LivreDto>()
+        : livresDisponibles!.Where(l =>
             l.Titre.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
             l.Auteur.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
 
@@ -96,11 +79,13 @@ else
         try
         {
             isLoading = true;
-            livres = await Http.GetFromJsonAsync<List<LivreDto>>("/api-bibliotheque/operation/disponible");
+            livresDisponibles = await Http.GetFromJsonAsync<List<LivreDto>>("/api-bibliotheque/operation/disponible");
+            UpdatePagedLivres();
         }
         catch (Exception ex)
         {
-            Message = $"Erreur lors du chargement des livres : {ex.Message}";
+            Message = GestionErreurs.GererErreur(ex);
+            Success = false;
         }
         finally
         {
@@ -108,27 +93,34 @@ else
         }
     }
 
-    private void PreviousPage()
+    private void UpdatePagedLivres()
     {
-        if (currentPage > 1)
+        if (filteredLivres.Any())
         {
-            currentPage--;
+            pagedLivresDisponibles = filteredLivres
+                .Skip((currentPage - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+        }
+        else
+        {
+            pagedLivresDisponibles = new List<LivreDto>();
         }
     }
 
-    private void NextPage()
+    private void HandlePageChange(int page)
     {
-        if (currentPage < totalPages)
-        {
-            currentPage++;
-        }
+        currentPage = page;
+        UpdatePagedLivres();
     }
 
-    private void GoToPage(int page)
+    private async Task OnSearchInput(ChangeEventArgs e)
     {
-        if (page >= 1 && page <= totalPages)
-        {
-            currentPage = page;
-        }
+        searchTerm = e.Value?.ToString() ?? string.Empty;
+        currentPage = 1;
+        rechercheEffectuee = true;
+        Message = null;
+        Success = false;
+        UpdatePagedLivres();
     }
 }

@@ -2,8 +2,9 @@
 @inject HttpClient Http
 @using CommonLib.GestBibliotheque.Utilitaires
 @using GestBibliotheque.Blazor.Models
+@inject NavigationManager Navigation
 
-<h3 class="mb-3">Ajouter un Emprunt</h3>
+<h3 class="mb-3">Ajouter un emprunt</h3>
 
 @if (!string.IsNullOrEmpty(Message))
 {
@@ -124,13 +125,7 @@
             {
                 Message = "Emprunt ajouté avec succès.";
                 Success = true;
-                emprunt = new EmpruntDto
-                    {
-                        DateDebut = DateTime.Today,
-                        DateRetourPrevue = DateTime.Today + TimeSpan.FromDays(14)
-                    };
-                selectedUsagerString = "";
-                selectedLivreString = "";
+                Navigation.NavigateTo("Emprunt/emprunts");
             }
             else
             {

@@ -3,13 +3,11 @@
 @inject HttpClient Http
 @using CommonLib.GestBibliotheque.Utilitaires
 
-<h3 class="mb-3">Liste des Livres</h3>
-
+<h3 class="mb-3">Liste des livres</h3>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <a href="/Livre/Ajout-Livres" class="btn btn-success">Ajouter un Livre</a>
 </div>
-
 
 @* Recherche *@
 <div class="mb-3">
@@ -21,9 +19,9 @@
     <div class="alert @(Success ? "alert-success" : "alert-danger")">@Message</div>
 }
 
-@if (pagedLivres == null)
+@if (isLoading)
 {
-    <p class="alert alert-warning">Chargement en cours...</p>
+    <LoadingSpinner />
 }
 else if (!pagedLivres.Any() && rechercheEffectuee)
 {
@@ -62,45 +60,12 @@ else
     </table>
 
     @* Pagination *@
-    <nav>
-        <ul class="pagination">
-            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                <a class="page-link" @onclick="PreviousPage">Précédent</a>
-            </li>
-            @for (int i = 1; i <= totalPages; i++)
-            {
-                <li class="page-item @(currentPage == i ? "active" : "")">
-                    <a class="page-link" @onclick="() => GoToPage(i)">@i</a>
-                </li>
-            }
-            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
-                <a class="page-link" @onclick="NextPage">Suivant</a>
-            </li>
-        </ul>
-    </nav>
+    <Pagination CurrentPage="currentPage" TotalPages="totalPages" OnPageChanged="HandlePageChanged" />
 }
 
-@if (showConfirmation)
-{
-    <div class="modal show d-block" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirmation</h5>
-                    <button type="button" class="btn-close" aria-label="Close" @onclick="FermerConfirmation"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Êtes-vous sûr de vouloir supprimer ce livre ?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="FermerConfirmation">Annuler</button>
-                    <button type="button" class="btn btn-danger" @onclick="ConfirmerSuppression">Supprimer</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="modal-backdrop show"></div>
-}
+<ConfirmationModal @bind-showConfirmation="showConfirmation"
+                   Message="Êtes-vous sûr de vouloir supprimer ce livre ?"
+                   OnConfirm="ConfirmerSuppression" />
 
 @code {
     private List<LivreDto>? livres;
@@ -117,9 +82,9 @@ else
     private Guid idLivreASupprimer;
     private bool showConfirmation;
 
+    private bool isLoading = true;
     private bool rechercheEffectuee = false;
 
-    // Liste filtrée
     private List<LivreDto> filteredLivres => string.IsNullOrWhiteSpace(searchTerm)
         ? livres ?? new List<LivreDto>()
         : livres!.Where(l =>
@@ -131,6 +96,7 @@ else
     {
         try
         {
+            isLoading = true;
             livres = await Http.GetFromJsonAsync<List<LivreDto>>("/api-bibliotheque/livre");
             UpdatePagedLivres();
         }
@@ -138,6 +104,10 @@ else
         {
             Message = GestionErreurs.GererErreur(ex);
             Success = false;
+        }
+        finally
+        {
+            isLoading = false;
         }
     }
 
@@ -178,55 +148,22 @@ else
         }
         finally
         {
-            FermerConfirmation();
+            showConfirmation = false;
         }
-    }
-
-    private void FermerConfirmation()
-    {
-        showConfirmation = false;
     }
 
     private void UpdatePagedLivres()
     {
-        if (filteredLivres.Any())
-        {
-            pagedLivres = filteredLivres
-                .Skip((currentPage - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-        }
-        else
-        {
-            pagedLivres = new List<LivreDto>();
-        }
+        pagedLivres = filteredLivres
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
     }
 
-    private void PreviousPage()
+    private void HandlePageChanged(int page)
     {
-        if (currentPage > 1)
-        {
-            currentPage--;
-            UpdatePagedLivres();
-        }
-    }
-
-    private void NextPage()
-    {
-        if (currentPage < totalPages)
-        {
-            currentPage++;
-            UpdatePagedLivres();
-        }
-    }
-
-    private void GoToPage(int page)
-    {
-        if (page >= 1 && page <= totalPages)
-        {
-            currentPage = page;
-            UpdatePagedLivres();
-        }
+        currentPage = page;
+        UpdatePagedLivres();
     }
 
     private async Task OnSearchInput(ChangeEventArgs e)
