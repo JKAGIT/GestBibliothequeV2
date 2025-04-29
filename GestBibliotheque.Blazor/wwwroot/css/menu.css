@@ -6,9 +6,22 @@
     font-weight: bold;
 }
 
+.navbar {
+    padding: 1rem 2rem;
+}
+
 .navbar-brand {
     font-size: 1.2rem;
     color: white;
+}
+
+.navbar-toggler {
+    border: none;
+    background-color: transparent;
+}
+
+.navbar-toggler-icon {
+    background-color: #ffffff;
 }
 
 /* SIDEBAR */
@@ -18,6 +31,7 @@
     min-height: 100vh;
 }
 
+/* NAVIGATION */
 .nav-link {
     color: #333;
     padding: 0.5rem 1rem;
@@ -31,39 +45,17 @@
         color: #000;
     }
 
-/* RESPONSIVE MENU */
-.navbar-toggler {
-    border: none;
-    background-color: transparent;
+.navbar-nav .nav-item .nav-link:hover {
+    background-color: #e7e7e7;
 }
 
-.navbar-toggler-icon {
-    background-color: #ffffff;
+.nav-item {
+    font-size: 1.1rem;
+    padding: 0.5rem 0;
 }
 
-/* A la taille mobile, on cache le menu par défaut */
-@media (max-width: 768px) {
-    .navbar-collapse {
-        display: none;
-        width: 100%;
-    }
-
-        .navbar-collapse.show {
-            display: block;
-        }
-
-    .nav-link {
-        font-size: 1.1rem;
-        padding: 0.5rem 1.5rem;
-    }
-
-    .nav-item {
-        margin-bottom: 1rem;
-    }
-
-    .ps-4 {
-        padding-left: 1rem;
-    }
+.bi {
+    margin-right: 0.5rem;
 }
 
 /* Menu déroulant */
@@ -105,33 +97,28 @@
         transform: translateY(0);
     }
 }
-/* Amélioration de la réactivité et de l'apparence */
-.navbar {
-    padding: 1rem 2rem;
-}
 
-.nav-item {
-    font-size: 1.1rem;
-    padding: 0.5rem 0;
-}
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .navbar-collapse {
+        display: none;
+        width: 100%;
+    }
 
-/* Icones et sous-menus */
-.bi {
-    margin-right: 0.5rem;
-}
+        .navbar-collapse.show {
+            display: block;
+        }
 
-/* Amélioration de l'animation de sous-menu */
-.submenu {
-    margin-left: 1rem;
-    padding-left: 0.5rem;
-    border-left: 2px solid #ccc;
-}
+    .nav-link {
+        font-size: 1.1rem;
+        padding: 0.5rem 1.5rem;
+    }
 
-.navbar-toggler-icon {
-    background-color: #fff;
-}
+    .nav-item {
+        margin-bottom: 1rem;
+    }
 
-/* Personnalisation de la couleur du sous-menu */
-.navbar-nav .nav-item .nav-link:hover {
-    background-color: #e7e7e7;
+    .ps-4 {
+        padding-left: 1rem;
+    }
 }

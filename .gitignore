@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Fichiers de configuration sensibles spécifiques aux projets
+/GestionDesLivres.API/appsettings.json
+/GestBibliotheque.Blazor/wwwroot/appsettings.json

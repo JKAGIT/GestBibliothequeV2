@@ -3,14 +3,14 @@
 @using GestBibliotheque.Blazor.Models
 @inject HttpClient Http
 
-<h3 class="text-center mb-4">Gestion des emprunts</h3>
+<h4 class="text-center mb-4">Gestion des emprunts</h4>
 
 <div class="mb-3">
     <a href="/Emprunt/Ajout-Emprunts" class="btn btn-primary">Emprunter un livre</a>
 </div>
 
 <!-- Emprunts actifs -->
-<h4>Emprunts actifs</h4>
+<h5>Emprunts actifs</h5>
 @if (isLoading)
 {
     <LoadingSpinner />
@@ -29,7 +29,7 @@ else
 }
 
 <!-- Emprunts retournés -->
-<h4 class="mt-5">Emprunts retournés</h4>
+<h5 class="mt-5">Emprunts retournés</h5>
 @if (isLoading)
 {
     <LoadingSpinner />
